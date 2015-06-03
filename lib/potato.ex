@@ -1,0 +1,2 @@
+defmodule Potato do
+end
