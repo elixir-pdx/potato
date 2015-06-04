@@ -2,11 +2,14 @@ defmodule Babysitter do
   use Supervisor
 
   def start_link do
-    Supervisor.start_link(__MODULE__, :ok)
+    {:ok, pid} = Supervisor.start_link(__MODULE__, :ok)
+    play(pid)
+
+    {:ok, pid}
   end
 
   def init(:ok) do
-    IO.puts "Babysitter init"
+    # IO.puts "Babysitter init"
     maxChildren = 50
 
     nChildren = random(maxChildren)
@@ -19,10 +22,12 @@ defmodule Babysitter do
     # IO.inspect children
 
     potato = worker(Potato, [], id: make_ref())
+    # IO.inspect potato
+    # IO.puts "thats the potato"
 
     children = [potato] ++ children
 
-    IO.puts "Sitter is about to start the game"
+    # IO.puts "Sitter is about to start the game"
 
     supervise(children, strategy: :one_for_all, max_restarts: 0)
     # supervise(children, strategy: :one_for_one)
@@ -31,7 +36,7 @@ defmodule Babysitter do
   end
 
   def play(pid) do
-    IO.puts "Sitter has started the game!"
+    IO.puts "start!"
 
     all_processes = Supervisor.which_children(pid)
 
@@ -46,7 +51,8 @@ defmodule Babysitter do
   end
 
   def killall(pid) do
-    IO.puts "Sitter KILLING all children"
+    IO.puts ""
+    IO.puts "XX"
     Process.exit(pid, :grenade)
   end
 

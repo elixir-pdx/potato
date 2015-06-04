@@ -6,5 +6,6 @@ defmodule PotatoTest do
 
     Parent.go_out(pid)
 
+    :timer.sleep(5000)
   end
 end

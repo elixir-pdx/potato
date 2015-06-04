@@ -8,52 +8,74 @@ defmodule Child do
 
   def init(:ok) do
     if Babysitter.random(25) == 13 do
-      IO.puts "Created a sociopath"
+      # IO.puts "Created a sociopath"
       {:ok, :sociopath}
     else
-      IO.puts "Created a normal child"
+      # IO.puts "Created a normal child"
       {:ok, :normal}
     end
   end
 
-  def handle_call({:hot_potato, potato_pid, [], sitter_pid}, _from, :normal) do
-    :potato = Potato.state(potato_pid)
-
-    # We won
-    IO.puts "Won teh game!"
-
-
-    {:reply, :normal, :normal}
-  end
-
-  def handle_call({:hot_potato, potato_pid, children_pids, sitter_pid}, _from, :normal) do
-    
+  def handle_cast({:hot_potato, potato_pid, [], sitter_pid}, :normal) do
     case Potato.state(potato_pid) do
-      :potato -> IO.puts "Got a hot potato!"
-        [first_child | other_children] = children_pids
-        Child.hot_potato(first_child, potato_pid, other_children, sitter_pid)
-      :grenade -> IO.puts "Got a grenade."
+      :potato -> 
+        IO.puts ""
+        IO.puts "Won teh game!"
+      :grenade -> 
+        IO.write "!"
         Babysitter.killall(sitter_pid)
     end
 
-
-
-    {:reply, :normal, :normal}
+    {:noreply, :normal}
   end
 
-  def handle_call({:hot_potato, potato_pid, children_pids, sitter_pid}, _from, :sociopath) do
-    Potato.kill(potato_pid)
+  def handle_cast({:hot_potato, potato_pid, children_pids, sitter_pid}, :normal) do
+    
+    case Potato.state(potato_pid) do
+      :potato -> 
+        IO.write "."
+        [first_child | other_children] = children_pids
+        Child.hot_potato(first_child, potato_pid, other_children, sitter_pid)
+      :grenade -> 
+        IO.write "!"
+        Babysitter.killall(sitter_pid)
+    end
 
-    IO.puts "Passing a grenade (I'm a sociopath)!"
+    {:noreply, :normal}
+  end
+
+  def handle_cast({:hot_potato, potato_pid, children_pids, sitter_pid}, :sociopath) do
+    case Potato.state(potato_pid) do
+      :potato -> 
+        # IO.puts "Got a hot potato!"
+        Potato.kill(potato_pid)
+      :grenade -> 
+        IO.write "!"
+        Babysitter.killall(sitter_pid)
+    end
+
+    # IO.puts "Passing a grenade (I'm a sociopath)!"
 
     [first_child | other_children] = children_pids
     Child.hot_potato(first_child, potato_pid, other_children, sitter_pid)
 
-    {:reply, :sociopath, :sociopath}
+    {:noreply, :sociopath}
   end
 
+  def handle_cast({:hot_potato, potato_pid, [], sitter_pid}, :sociopath) do
+    case Potato.state(potato_pid) do
+      :potato -> 
+        IO.puts "Sociopath Won teh game!"
+      :grenade -> 
+        IO.write "!"
+        Babysitter.killall(sitter_pid)
+    end
+
+    {:noreply, :sociopath}
+  end  
+
   def hot_potato(pid, potato_pid, children_pids, sitter_pid) do
-    GenServer.call(pid, {:hot_potato, potato_pid, children_pids, sitter_pid})
+    GenServer.cast(pid, {:hot_potato, potato_pid, children_pids, sitter_pid})
 
   end
 end
