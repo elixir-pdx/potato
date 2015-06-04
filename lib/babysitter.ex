@@ -6,6 +6,7 @@ defmodule Babysitter do
   end
 
   def init(:ok) do
+    IO.puts "Babysitter init"
     maxChildren = 50
 
     nChildren = random(maxChildren)
@@ -23,22 +24,16 @@ defmodule Babysitter do
 
     IO.puts "Sitter is about to start the game"
 
-    # supervise(children, strategy: :one_for_all, max_restarts: 3)
-    supervise(children, strategy: :one_for_one)
-
-    IO.inspect children
-    IO.puts "Sitter started supervising"
+    supervise(children, strategy: :one_for_all, max_restarts: 0)
+    # supervise(children, strategy: :one_for_one)
 
     # play(self)
   end
 
   def play(pid) do
     IO.puts "Sitter has started the game!"
-    IO.inspect pid
 
     all_processes = Supervisor.which_children(pid)
-
-    IO.inspect all_processes
 
     [child_processes, [potato_process]] = Enum.chunk_by(all_processes, fn({_, _, _, [type]}) -> type == Child end)
 
@@ -47,7 +42,12 @@ defmodule Babysitter do
 
     [first_child | shuffled_children] = Enum.shuffle(child_pids)
 
-    Child.hot_potato(first_child, potato_pid, shuffled_children)
+    Child.hot_potato(first_child, potato_pid, shuffled_children, pid)
+  end
+
+  def killall(pid) do
+    IO.puts "Sitter KILLING all children"
+    Process.exit(pid, :grenade)
   end
 
   def random(n) do

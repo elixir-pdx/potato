@@ -10,7 +10,9 @@ defmodule Parent do
       worker(Babysitter, [])
     ]
 
-    supervise(children, strategy: :one_for_one)
+    return = supervise(children, strategy: :one_for_one, max_restarts: 3)
+    IO.inspect return
+    return
   end
 
   def go_out(pid) do

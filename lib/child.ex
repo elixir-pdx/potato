@@ -16,7 +16,7 @@ defmodule Child do
     end
   end
 
-  def handle_call({:hot_potato, potato_pid, []}, _from, :normal) do
+  def handle_call({:hot_potato, potato_pid, [], sitter_pid}, _from, :normal) do
     :potato = Potato.state(potato_pid)
 
     # We won
@@ -26,30 +26,34 @@ defmodule Child do
     {:reply, :normal, :normal}
   end
 
-  def handle_call({:hot_potato, potato_pid, children_pids}, _from, :normal) do
-    :potato = Potato.state(potato_pid)
+  def handle_call({:hot_potato, potato_pid, children_pids, sitter_pid}, _from, :normal) do
+    
+    case Potato.state(potato_pid) do
+      :potato -> IO.puts "Got a hot potato!"
+        [first_child | other_children] = children_pids
+        Child.hot_potato(first_child, potato_pid, other_children, sitter_pid)
+      :grenade -> IO.puts "Got a grenade."
+        Babysitter.killall(sitter_pid)
+    end
 
-    IO.puts "Got a hot potato!"
 
-    [first_child | other_children] = children_pids
-    Child.hot_potato(first_child, potato_pid, other_children)
 
     {:reply, :normal, :normal}
   end
 
-  def handle_call({:hot_potato, potato_pid, children_pids}, _from, :sociopath) do
+  def handle_call({:hot_potato, potato_pid, children_pids, sitter_pid}, _from, :sociopath) do
     Potato.kill(potato_pid)
 
     IO.puts "Passing a grenade (I'm a sociopath)!"
 
     [first_child | other_children] = children_pids
-    Child.hot_potato(first_child, potato_pid, other_children)
+    Child.hot_potato(first_child, potato_pid, other_children, sitter_pid)
 
     {:reply, :sociopath, :sociopath}
   end
 
-  def hot_potato(pid, potato_pid, children_pids) do
-    GenServer.call(pid, {:hot_potato, potato_pid, children_pids})
+  def hot_potato(pid, potato_pid, children_pids, sitter_pid) do
+    GenServer.call(pid, {:hot_potato, potato_pid, children_pids, sitter_pid})
 
   end
 end
