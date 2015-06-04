@@ -1,7 +1,7 @@
 defmodule PotatoTest do
   use ExUnit.Case
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  test "run the parents" do
+    Parent.start_link
   end
 end
