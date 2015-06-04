@@ -12,10 +12,10 @@ defmodule Babysitter do
 
     range = 1..nChildren
 
-    IO.inspect range
+    # IO.inspect range
 
     children = Enum.map(range, fn(n) -> worker(Child, [], id: make_ref()) end)
-    IO.inspect children
+    # IO.inspect children
 
     supervise(children, strategy: :one_for_one)
 
