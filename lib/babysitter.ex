@@ -17,6 +17,10 @@ defmodule Babysitter do
     children = Enum.map(range, fn(n) -> worker(Child, [], id: make_ref()) end)
     # IO.inspect children
 
+    potato = worker(Potato, [], id: make_ref())
+
+    children = [potato] ++ children
+    IO.inspect children
     supervise(children, strategy: :one_for_one)
 
   end

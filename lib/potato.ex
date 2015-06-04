@@ -17,5 +17,14 @@ defmodule Potato do
     {:noreply, :grenade}
   end
 
+  def state(server) do
+    GenServer.call(server, {:state})
+  end
+  
+  def kill(server) do
+    GenServer.cast(server, {:kill})
+  end
+
+
 
 end
