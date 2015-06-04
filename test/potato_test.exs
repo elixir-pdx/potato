@@ -1,7 +1,11 @@
 defmodule PotatoTest do
   use ExUnit.Case
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  test "run the parents" do
+    {_, pid} = Parent.start_link
+
+    Parent.go_out(pid)
+
+    :timer.sleep(5000)
   end
 end
