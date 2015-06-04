@@ -2,6 +2,9 @@ defmodule PotatoTest do
   use ExUnit.Case
 
   test "run the parents" do
-    Parent.start_link
+    {_, pid} = Parent.start_link
+
+    Parent.go_out(pid)
+
   end
 end

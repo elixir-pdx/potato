@@ -12,4 +12,10 @@ defmodule Parent do
 
     supervise(children, strategy: :one_for_one)
   end
+
+  def go_out(pid) do
+    [{_, pid, _, [Babysitter]}] = Supervisor.which_children(pid)
+
+    Babysitter.play(pid)
+  end
 end

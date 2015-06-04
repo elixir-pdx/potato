@@ -20,9 +20,20 @@ defmodule Babysitter do
     potato = worker(Potato, [], id: make_ref())
 
     children = [potato] ++ children
-    IO.inspect children
     supervise(children, strategy: :one_for_one)
+    # IO.inspect children
+  end
 
+  def play(pid) do
+    all_processes = Supervisor.which_children(pid)
+
+    [child_processes, [potato_process]] = Enum.chunk_by(all_processes, fn({_, _, _, [type]}) -> type == Child end)
+
+    child_pids = Enum.map(child_processes, fn({_, pid, _, [Child]}) -> pid end)
+    {_, potato_pid, _, [Potato]} = potato_process
+
+    IO.inspect potato_pid
+    IO.inspect child_pids
   end
 
   def random(n) do
